@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tuner Jumping Around on Low E? Causes and Octave Errors | The Big Tuna</title>
+  <meta name="description" content="Phone tuner jumping around or reading the wrong octave on the low E? Why it happens, five fixes that work, and how Big Tuna's pitch detection deals with it.">
+  <link rel="canonical" href="https://tnrich.github.io/big-tuna-site/blog/why-guitar-tuners-jump-around/">
+  <meta name="theme-color" content="#061826">
+  <meta name="author" content="Thomas Willheim">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Big Tuna">
+  <meta property="og:url" content="https://tnrich.github.io/big-tuna-site/blog/why-guitar-tuners-jump-around/">
+  <meta property="og:title" content="Why phone tuners jump around on the low E string">
+  <meta property="og:description" content="Why the low E fools phone tuners, what fixes it, and how Big Tuna picks the right note and octave.">
+  <meta property="og:image" content="https://tnrich.github.io/big-tuna-site/img/og.png">
+  <meta property="article:published_time" content="2026-11-18">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../img/favicon.png">
+  <link rel="stylesheet" href="../../style.css?v=20eb42f7">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Why phone tuners jump around on the low E string (and read the wrong octave)",
+    "description": "Phone tuner jumping around or reading the wrong octave on the low E? Why it happens, five fixes that work, and how Big Tuna's pitch detection deals with it.",
+    "url": "https://tnrich.github.io/big-tuna-site/blog/why-guitar-tuners-jump-around/",
+    "mainEntityOfPage": "https://tnrich.github.io/big-tuna-site/blog/why-guitar-tuners-jump-around/",
+    "datePublished": "2026-11-18",
+    "dateModified": "2026-11-18",
+    "image": "https://tnrich.github.io/big-tuna-site/img/og.png",
+    "author": { "@type": "Person", "name": "Thomas Willheim", "url": "https://tnrich.github.io/big-tuna-site/" },
+    "publisher": { "@type": "Organization", "name": "The Big Tuna", "logo": { "@type": "ImageObject", "url": "https://tnrich.github.io/big-tuna-site/img/icon.png" } }
+  }
+  </script>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../../"><img src="../../img/icon.png" alt=""><span>The Big Tuna</span></a>
+    <a class="link" href="../" aria-current="page">Blog</a>
+    <a class="link" href="../../support/">Support</a>
+    <a class="link" href="../../beta/">Beta</a>
+  </div>
+</nav>
+
+<main class="wrap narrow prose">
+  <h1>Why phone tuners jump around on the low E string (and read the wrong octave)</h1>
+  <p class="meta">By Thomas Willheim &middot; November 18, 2026</p>
+
+  <p>A phone tuner jumps around on the low E because the phone's mic barely hears the note you are tuning. It hears the string's harmonics, the attack of your pick and whatever else is ringing, and it has to guess the note from those. Most of the jumping goes away if you pluck with the flesh of your thumb instead of a pick, mute the other strings and give the note half a second before you read it.</p>
+
+  <p>The first half of this post is for guitarists: what is going on, and what to do about it. The second half is for developers: how Big Tuna's pitch detection handles the same problems, with code from the app.</p>
+
+  <h2>Why the low E is the hard one</h2>
+
+  <h3>The note you want is the quietest part of the sound</h3>
+  <p>A plucked string doesn't vibrate at one frequency. It vibrates at its fundamental (the note) and at whole-number multiples of it, the harmonics. For the low E that looks like this:</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Harmonic</th><th scope="col" class="num">Frequency</th><th scope="col">Sounds like</th></tr></thead>
+    <tbody>
+      <tr><td>1 (fundamental)</td><td class="num">82.41 Hz</td><td>E2, the note you are tuning</td></tr>
+      <tr><td>2</td><td class="num">164.81 Hz</td><td>E3, one octave up</td></tr>
+      <tr><td>3</td><td class="num">247.22 Hz</td><td>B3, an octave and a fifth up</td></tr>
+      <tr><td>4</td><td class="num">329.63 Hz</td><td>E4, two octaves up (the high E string)</td></tr>
+      <tr><td>5</td><td class="num">412.03 Hz</td><td>close to G&sharp;4</td></tr>
+      <tr><td>6</td><td class="num">494.44 Hz</td><td>B4, the B string's octave</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>On a low string, a lot of the energy sits in those upper harmonics rather than the fundamental. Your ear still hears E2. A tuner has to work it out, and if it settles on the wrong harmonic it shows the wrong note or the right note in the wrong octave.</p>
+
+  <h3>Small mics barely hear 82 Hz</h3>
+  <p>Phone and laptop mics are built for voices. They roll off low frequencies, so by the time the low E reaches the tuner its fundamental is weaker still compared with the harmonics. With the second harmonic strong and the fundamental faint, the waveform almost repeats every half cycle, and a tuner that looks for the repeat reads E3: one octave high.</p>
+
+  <h3>The pluck itself is noisy and sharp</h3>
+  <p>The first instant of a pluck is a burst of noise, and the string really is sharp for that instant: it swings wide and pulls tighter before it settles. A tuner that shows the attack shows a jump up, then a slide back down.</p>
+
+  <h3>Other strings are ringing too</h3>
+  <p>The string you tuned a moment ago is still ringing, and the open strings ring along by sympathy. Neighbouring strings are a fourth apart, so two of them together repeat at a slower, common rate that isn't either note. A tuner that only looks for the repeat can read a note well below anything you played. That is the other kind of octave error: reading low.</p>
+
+  <h3>The note drifts and fades</h3>
+  <p>After the attack the pitch settles by a few cents, and as the string dies away it gets quiet enough that room noise starts to compete. A reading taken at the very start or the very end of a note is the least trustworthy one.</p>
+
+  <div class="callout"><p><strong>Why the wrong octave matters:</strong> an octave-high reading just looks odd. An octave-low reading on a string you have locked to is worse: the tuner says the string is far too low, you keep tightening, and the string breaks.</p></div>
+
+  <h2>How to get a steady reading</h2>
+  <ol class="steps-list">
+    <li><strong>Pluck with the flesh of your thumb, around the 12th fret.</strong> A soft thumb gives a gentler attack than a pick. The 12th fret is the middle of the string, and plucking at the middle barely excites the even harmonics, including the octave above, so the fundamental stands out more.</li>
+    <li><strong>Mute the other strings.</strong> Rest your fretting hand lightly across the strings you aren't tuning. This stops the last string you tuned, and the open strings, from ringing under the one you are tuning.</li>
+    <li><strong>Wait a beat after the pluck.</strong> Ignore the first flicker. Read the tuner once the note has settled, and pluck again before it fades out.</li>
+    <li><strong>Get the phone close.</strong> Hold it near the soundhole or the bridge. A louder signal makes the faint fundamental easier to hear over the room, the fridge and the fan.</li>
+    <li><strong>Lock the tuner to the string.</strong> In auto mode the tuner has to guess which string you played. An octave-high low E is two semitones from the D string, so auto mode can decide you are playing a sharp D. Locked to the low E, the tuner knows what to expect.</li>
+  </ol>
+
+  <div class="callout"><p><strong>Tip:</strong> tune up to the note, not down to it. If you overshoot, go a little under and come back up. That takes up the slack in the tuning machine, so the string holds its pitch better.</p></div>
+
+  <figure class="shot"><img src="../../img/shots/04.jpg" width="1080" height="2346" loading="lazy" alt="Big Tuna in auto mode recognising a low D string in Drop D"><figcaption>Auto mode picks the string from what it hears. Tap a string on the headstock to lock onto it instead.</figcaption></figure>
+
+  <div class="callout app"><p><strong>In Big Tuna:</strong> tap a string on the headstock to lock it. If you then play a different string, the tuner says which one it sounds like rather than telling you to tighten.</p></div>
+
+  <h2>How Big Tuna handles it</h2>
+  <p>This part is for developers. Big Tuna is a React Native app, and the pitch detection is plain TypeScript in <code>src/pitch/</code>: no native DSP module. The same code runs on Hermes, in the browser and under <code>bun test</code>, and a replay script feeds recordings through the whole engine offline.</p>
+  <p>The engine's own summary of the problem is the one from the first half of this post: on a real guitar the string being tuned is rarely alone. Most of the code is about not mistaking the other strings, the harmonics and the room for the note.</p>
+
+  <h3>Getting clean audio in</h3>
+  <p>On iOS the audio session runs in <code>measurement</code> mode, which turns off the system's voice processing (automatic gain and noise gate). That processing would otherwise squash a quiet, sustained note. On the web, <code>getUserMedia</code> is called with echo cancellation, noise suppression and auto gain control all off.</p>
+  <p>The tuner analyses the newest frame every 45 ms. Each frame is downsampled to about 22&ndash;24 kHz, then filtered:</p>
+  <ul>
+    <li>A low-pass at three times the top of the detection range (never below 800 Hz), run twice forwards and twice backwards: 48 dB per octave and zero phase. That cuts hiss, fan whine and clicks.</li>
+    <li>The frame's linear trend is subtracted, which removes DC offset.</li>
+    <li>No high-pass. In the synthetic tests a high-pass below the lowest string cost the low strings several cents and caused octave errors, and the low-pass keeps several harmonics on purpose, because the period can be found from them when the fundamental is faint.</li>
+  </ul>
+  <p>The detection range runs from 10 semitones below the lowest string of the tuning to 9 above the highest. The frame is sized to hold at least 2.6 periods of the lowest frequency in that range: 4096 samples at the mic&rsquo;s sample rate, doubled as needed, up to 16384.</p>
+
+  <h3>YIN, with an octave check</h3>
+  <p>The period detector is YIN (de Cheveign&eacute; and Kawahara, 2002). It compares the frame with delayed copies of itself, normalises the differences, and takes the first delay whose difference dips under a threshold (0.15) as the period. The difference function runs on an FFT, so even the longest frames stay cheap.</p>
+  <p>Plain YIN takes the first good dip, which is exactly the octave-high error from above: with a faint fundamental, the half-period dip is good enough. So after picking a dip, it looks at twice that delay:</p>
+
+<pre><code>// With a phone mic the fundamental of a low string is faint, and if the
+// odd harmonics are weak too the waveform nearly repeats every half
+// period, so the first dip is an octave high.
+const doubled = best * 2;
+if (doubled + 3 &lt;= maxLag) {
+  let deep = doubled;
+  for (let tau = doubled - 2; tau &lt;= doubled + 2; tau++) if (d[tau] &lt; d[deep]) deep = tau;
+  const here = dipDepth(best);
+  if (here &gt; 0.01 &amp;&amp; dipDepth(deep) &lt; here * 0.5) best = deep;
+}</code></pre>
+
+  <p>The bar is deliberately high: the dip at double the delay has to be less than half as deep before the reading drops an octave. An octave-low reading is the more harmful error, so the check leans against making one.</p>
+  <p>YIN also hands back every dip shallower than 0.75 as a candidate, not just the one it picked. With two strings ringing, the deepest dip is often their common subharmonic, so the engine makes the final call itself.</p>
+
+  <h3>Ignoring the attack</h3>
+  <p>A note starts when a frame is clearly periodic (clarity of at least 0.65), at least 3.2 times the learned room level (about 10 dB), and shows a pluck: either the level jumps to 1.6 times the quietest of the last three frames, or at least 35% of the spectrum is new since the frame before. That second test, spectral flux, catches a pluck that is quieter than a string still ringing, because a pluck adds partials where there were none while a ringing string only fades.</p>
+  <p>Then the first 150 ms of the note are skipped. The string is sharp for its first instant, and the analysis frame still holds sound from before the pluck. For the very long frames of low bass tunings, the wait stretches to most of a frame length.</p>
+
+  <h3>Which note: the energy the pluck added</h3>
+  <p>Periodicity alone can't tell a D3 and A2 ringing together from a lone D2. The code comment has a concrete case: plucking the G with the D still ringing reads 49 Hz, their common subharmonic. What tells them apart is what changed. When a pluck is detected, the engine keeps the spectrum of the frame from just before it. After the attack it scores each YIN candidate, and twice, three and four times each candidate, by how much new energy lines up with its harmonic series:</p>
+
+<pre><code>// Per partial of `frequency`: how much louder it is now than before the pluck.
+for (let h = 1; h * frequency &lt;= maxFrequency; h++) {
+  const gain = strongestGainNear(h * frequency); // now[k] - before[k], within a few cents
+  if (gain &gt; floor) sum += gain - floor;
+}
+
+// Candidates highest-frequency first: take the highest one that explains
+// about as much of the new energy as any lower one.
+const best = Math.max(...support);
+const index = support.findIndex((s) =&gt; s &gt;= best * SUPPORT_RATIO); // 0.8
+return frequencies[index];</code></pre>
+
+  <p>This works in both octave directions. A subharmonic covers everything the real note does, plus empty slots in between, so it never scores much higher. The floor stops those empty slots, each holding a little noise, from adding up. An octave-high candidate misses the odd partials, so it scores clearly lower.</p>
+
+  <h3>How far off: the note's own partials</h3>
+  <p>Once the note is known, YIN's dip isn't used for the cents reading, because another ringing string shifts it by several cents. Instead the engine measures the first six partials of the note one by one, each at the exact peak of the windowed spectrum, and skips any that sit within 2.2 bins of a partial from whatever was ringing before the pluck. The rest are averaged by strength.</p>
+  <p>Real strings are stiff, so each partial sits a little sharper than a whole multiple. With three or more partials the engine fits that drift and reads the first partial from the fit, instead of a plain average that would come out slightly sharp.</p>
+  <p>From then on, each frame is measured near the previous reading. A frame that briefly loses the note is skipped, and the note only ends after more than three misses in a row or when the level falls back toward the room.</p>
+
+  <h3>Smoothing and picking the string</h3>
+  <p>Readings go through two smoothers, in MIDI units so a cent is the same size on every string:</p>
+  <ul>
+    <li>A median of the last five readings. Readings more than 0.6 semitones from the newest one drop out of the window, and a jump has to be confirmed by a second reading before it shows. One stray frame (a harmonic, a knock) can't move the display.</li>
+    <li>A One Euro filter for the needle: heavy smoothing while the pitch holds still, light smoothing while you turn a peg, so a held note reads as a steady number and the needle still keeps up with the peg.</li>
+  </ul>
+  <p>In auto mode, a fresh pluck within a semitone of a string switches to it straight away. Otherwise another string has to be 0.35 semitones closer than the current one for three readings in a row, so a badly detuned string doesn't flip between neighbours.</p>
+  <p>Whenever there is a target string, one last guard folds octave errors back. A string can be very flat, but a few semitones sharp and it breaks, so a reading more than 4 semitones sharp or more than 9 flat is treated as an octave error:</p>
+
+<pre><code>const MAX_SHARP = 4; // semitones
+const MAX_FLAT = -9;
+
+export function foldOctaves(diff: number): number {
+  if (diff &gt; MAX_SHARP) {
+    let best = diff;
+    for (let d = diff - 12; d &gt;= -WAY_OFF; d -= 12) if (Math.abs(d) &lt; Math.abs(best)) best = d;
+    return best;
+  }
+  if (diff &lt; MAX_FLAT) {
+    let best = diff;
+    for (let d = diff + 12; d &lt;= MAX_SHARP; d += 12) if (d &gt;= MAX_FLAT &amp;&amp; Math.abs(d) &lt; Math.abs(best)) best = d;
+    return best;
+  }
+  return diff;
+}</code></pre>
+
+  <p>Sharp readings only fold down as far as 3 semitones flat (<code>WAY_OFF</code>), so a misread harmonic can at worst say &ldquo;loosen&rdquo;, never &ldquo;tighten five semitones&rdquo;. When you are locked to one string and the sound is within half a semitone of a different string (and at least 1.5 semitones from yours), the tuner says &ldquo;Sounds like&rdquo; that string instead of giving advice.</p>
+
+  <figure class="shot"><img src="../../img/shots/02.jpg" width="1080" height="2346" loading="lazy" alt="Big Tuna showing the A string 14 cents flat with the advice to tighten the string"><figcaption>The end result: one string, one number, and which way to turn.</figcaption></figure>
+
+  <h3>Hum isn't a string</h3>
+  <p>One more source of false readings: mains hum and appliances. A plucked string decays, hum doesn't. A quiet note that holds its level within about 2 dB for 1.5 seconds without having been plucked is folded into the room level, and so is a steady note at 50, 60, 100 or 120 Hz, however loud.</p>
+
+  <h3>Testing it</h3>
+  <p>None of this was tuned by ear alone. The tests build synthetic guitar sessions the way a phone hears them: a weak fundamental, stronger low harmonics, slightly stiff strings, a short attack and room noise, with the previous string still ringing when the next one is plucked. One test plucks the high E over the low E, which shares every one of its partials, and checks that the reading is the high E. Recordings from the app can be replayed through the same engine to check a fix against the sound that broke it.</p>
+
+  <h2>The trade-offs</h2>
+  <ul>
+    <li>Readings appear a moment after the pluck, not on it. Skipping the attack is the point, but it is a visible delay.</li>
+    <li>If every partial of the note is crowded by another string's, that frame gives no reading at all rather than a wrong one. Muting the other strings fixes it.</li>
+    <li>The octave guards assume a string is never tuned far sharp. That holds for a real string, which would break first.</li>
+  </ul>
+  <p>None of this makes a phone mic hear 82 Hz any better. It just stops the tuner from trusting the wrong thing, and the five fixes above do the rest.</p>
+
+  <h2>Read next</h2>
+  <div class="readnext">
+    <a href="../how-to-tune-a-guitar-with-your-phone/">How to tune a guitar with your phone<span>Standard tuning, which way to turn the pegs, and a tuner routine that holds.</span></a>
+    <a href="../guitar-tunings-chart/">Guitar tunings chart: notes and frequencies<span>Drop D, DADGAD, open tunings, 7 and 8 string, with every string's frequency.</span></a>
+    <a href="../432-hz-vs-440-hz/">432 Hz vs 440 Hz<span>What tuner calibration actually changes, and when to use 442 or 415.</span></a>
+  </div>
+
+  <div class="post-cta">
+    <img src="../../img/icon.png" alt="">
+    <p><strong>The Big Tuna - Guitar Tuner</strong>Free tuner for guitar, bass, ukulele and 12 more instruments. No ads, no account. Coming to the App Store and Google Play; Android testers can <a href="../../beta/">join the beta</a>.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 The Big Tuna</span>
+    <a href="../">Blog</a>
+    <a href="../../support/">Support</a>
+    <a href="../../privacy/">Privacy</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tnrich.github.io/big-tuna-site/sitemap.xml

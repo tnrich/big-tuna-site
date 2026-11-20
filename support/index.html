@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Big Tuna Support</title>
+  <meta name="description" content="Help with The Big Tuna - Guitar Tuner: microphone access, wrong-string readings, calibration, restoring Pro, and a contact form.">
+  <link rel="canonical" href="https://tnrich.github.io/big-tuna-site/support/">
+  <meta name="theme-color" content="#061826">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Big Tuna">
+  <meta property="og:url" content="https://tnrich.github.io/big-tuna-site/support/">
+  <meta property="og:title" content="Big Tuna Support">
+  <meta property="og:description" content="Help with The Big Tuna - Guitar Tuner: microphone access, wrong-string readings, calibration, restoring Pro, and a contact form.">
+  <meta property="og:image" content="https://tnrich.github.io/big-tuna-site/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../img/favicon.png">
+  <link rel="stylesheet" href="../style.css?v=20eb42f7">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../img/icon.png" alt=""><span>The Big Tuna</span></a>
+    <a class="link" href="../blog/">Blog</a>
+    <a class="link" href="../support/" aria-current="page">Support</a>
+    <a class="link" href="../beta/">Beta</a>
+  </div>
+</nav>
+
+<main class="wrap narrow prose">
+<h1>Support</h1>
+<p class="meta">The Big Tuna - Guitar Tuner</p>
+
+<h2>The tuner doesn't react</h2>
+<p>Check that Big Tuna has microphone access: on iPhone, Settings → Big Tuna → Microphone; on
+Android, Settings → Apps → Big Tuna → Permissions → Microphone. Then pluck a single string firmly,
+close to the phone.</p>
+
+<h2>It shows the wrong string</h2>
+<p>Mute the other strings and let one ring. Or turn off Auto and tap the string you're tuning,
+so the tuner measures against that note only.</p>
+
+<h2>My band tunes to 432 Hz (or 442 Hz)</h2>
+<p>Settings → Calibration (A4) sets the reference pitch from 415 to 466 Hz.</p>
+
+<h2>I bought Big Tuna Pro but it's locked</h2>
+<p>Open the gear icon → Big Tuna Pro and tap <strong>Restore purchase</strong>. Make sure you're
+signed in to the same Apple ID or Google account you bought it with. Pro is a one-time purchase:
+there is no subscription to renew or cancel.</p>
+
+<h2 id="contact">Something else? Send a message</h2>
+<p>It lands straight in my inbox. Tell me what happened and what phone you're on, and I'll reply
+by email.</p>
+<div class="callout">
+<form class="contact-form" action="https://formsubmit.co/cf8f572a7127778b614caed75050af33" method="POST">
+  <div class="row">
+    <label><span>Name <span class="opt">(optional)</span></span>
+      <input type="text" name="name" autocomplete="name">
+    </label>
+    <label><span>Your email</span>
+      <input type="email" name="email" autocomplete="email" required>
+    </label>
+  </div>
+  <div class="row">
+    <label><span>Phone</span>
+      <select name="platform">
+        <option value="">Choose one</option>
+        <option>iPhone</option>
+        <option>Android</option>
+      </select>
+    </label>
+    <label><span>Model &amp; OS version <span class="opt">(optional)</span></span>
+      <input type="text" name="device" placeholder="e.g. Pixel 8, Android 15">
+    </label>
+  </div>
+  <label><span>Message</span>
+    <textarea name="message" rows="6" required></textarea>
+  </label>
+  <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+  <input type="hidden" name="_subject" value="Big Tuna support message">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="hidden" name="_next" value="https://tnrich.github.io/big-tuna-site/support/?sent=1#contact">
+  <button class="btn" type="submit">Send message</button>
+  <p class="form-status" role="status" aria-live="polite"></p>
+</form>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 The Big Tuna</span>
+    <a href="../blog/">Blog</a>
+    <a href="../support/">Support</a>
+    <a href="../beta/">Android beta</a>
+    <a href="../privacy/">Privacy</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var form = document.querySelector('.contact-form');
+  var status = form.querySelector('.form-status');
+  var button = form.querySelector('button');
+  var thanks = "Thanks! Your message is on its way. I'll reply by email.";
+  if (location.search.indexOf('sent=1') !== -1) status.textContent = thanks;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    button.disabled = true;
+    status.className = 'form-status';
+    status.textContent = 'Sending…';
+    fetch(form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: new FormData(form)
+    })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || String(j.success) !== 'true') throw j; }); })
+      .then(function () { form.reset(); status.textContent = thanks; })
+      .catch(function (err) {
+        if (err && err.message) console.warn('Contact form:', err.message);
+        status.className = 'form-status error';
+        status.textContent = "That didn't go through. Please try again in a minute.";
+      })
+      .then(function () { button.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
